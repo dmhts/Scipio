@@ -98,7 +98,7 @@ struct FrameworkProducer {
             return
         }
 
-        let allTargets = OrderedSet(buildProducts.compactMap { buildProduct -> CacheSystem.CacheTarget? in
+        let allTargets = Set(buildProducts.compactMap { buildProduct -> CacheSystem.CacheTarget? in
             guard [.library, .binary].contains(buildProduct.target.type) else {
                 assertionFailure("Invalid target type")
                 return nil
