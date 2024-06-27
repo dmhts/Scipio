@@ -152,9 +152,12 @@ extension DescriptionPackage {
         let targetsToBuild = try targetsToBuild()
         var products = Array(try targetsToBuild.flatMap(resolveBuildProduct(from:)).uniqued())
 
-        var productMap: [String: BuildProduct] = Dictionary(products.map { ($0.target.name, $0) }) { $1 }
-        func resolvedTargetToBuildProduct(_ target: ResolvedModule) -> BuildProduct? {
-            productMap.removeValue(forKey: target.name)
+        let productMap: [String: BuildProduct] = Dictionary(products.map { ($0.target.name, $0) }) { $1 }
+        func resolvedTargetToBuildProduct(_ target: ResolvedModule) -> BuildProduct {
+            guard let product = productMap[target.name] else {
+                preconditionFailure("The dependency target (\(target.name)) was not found in the build target list")
+            }
+            return product
         }
 
         do {
@@ -162,13 +165,9 @@ extension DescriptionPackage {
                 return product.target.dependencies.flatMap { (dependency) in
                     switch dependency {
                     case .target(let target, conditions: _):
-                        if let buildProduct = resolvedTargetToBuildProduct(target) {
-                            return [buildProduct]
-                        } else {
-                            return []
-                        }
+                        return [resolvedTargetToBuildProduct(target)]
                     case .product(let product, conditions: _):
-                        return product.targets.compactMap(resolvedTargetToBuildProduct)
+                        return product.targets.map(resolvedTargetToBuildProduct)
                     }
                 }
             }
