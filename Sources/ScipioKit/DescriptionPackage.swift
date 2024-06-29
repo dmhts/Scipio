@@ -150,7 +150,7 @@ struct DescriptionPackage {
 extension DescriptionPackage {
     func resolveBuildProducts() throws -> [BuildProduct] {
         let targetsToBuild = try targetsToBuild()
-        var products = Array(try targetsToBuild.flatMap(resolveBuildProduct(from:)).uniqued())
+        var products = try targetsToBuild.flatMap(resolveBuildProduct(from:))
 
         let productMap: [String: BuildProduct] = Dictionary(products.map { ($0.target.name, $0) }) { $1 }
         func resolvedTargetToBuildProduct(_ target: ResolvedModule) -> BuildProduct {
